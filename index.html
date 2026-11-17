@@ -180,6 +180,16 @@
       <p class="subtitle">Monitor product performance and user behaviour</p>
     </div>
 
+<select id="countryFilter">
+  <option value="all">All Countries</option>
+  <option value="India">India</option>
+  <option value="UAE">UAE</option>
+  <option value="China">China</option>
+  <option value="USA">USA</option>
+  <option value="UK">UK</option>
+  <option value="Argentina">Argentina</option>
+</select>
+
     <select id="periodFilter">
       <option value="7">Last 7 days</option>
       <option value="30" selected>Last 30 days</option>
@@ -304,6 +314,52 @@
 </div>
 
 <script>
+
+const countryData = {
+  all: {
+    users: "12,450",
+    dau: "2,840",
+    mau: "8,920",
+    conversion: "24.6%"
+  },
+  India: {
+    users: "5,200",
+    dau: "1,300",
+    mau: "3,900",
+    conversion: "28.5%"
+  },
+  UAE: {
+    users: "1,800",
+    dau: "420",
+    mau: "1,200",
+    conversion: "22.4%"
+  },
+  China: {
+    users: "1,500",
+    dau: "350",
+    mau: "1,100",
+    conversion: "19.8%"
+  },
+  USA: {
+    users: "2,100",
+    dau: "500",
+    mau: "1,600",
+    conversion: "25.2%"
+  },
+  UK: {
+    users: "1,100",
+    dau: "250",
+    mau: "800",
+    conversion: "23.1%"
+  },
+  Argentina: {
+    users: "750",
+    dau: "150",
+    mau: "320",
+    conversion: "18.5%"
+  }
+};
+
   const activityData = {
     7: {
       labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -381,6 +437,26 @@
       activityChart.data.datasets[0].data = selected.dau;
       activityChart.update();
     });
+
+
+document.getElementById("countryFilter")
+  .addEventListener("change", function() {
+
+    const selected = countryData[this.value];
+
+    document.getElementById("totalUsers").textContent =
+      selected.users;
+
+    document.getElementById("dau").textContent =
+      selected.dau;
+
+    document.getElementById("mau").textContent =
+      selected.mau;
+
+    document.getElementById("conversion").textContent =
+      selected.conversion;
+  });
+
 </script>
 
 </body>
