@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Metrics Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      color: #202431;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 27px;
+    }
+
+    .subtitle {
+      color: #777;
+      margin-top: 7px;
+      font-size: 14px;
+    }
+
+    select {
+      padding: 11px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .card, .panel {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    }
+
+    .metric-label {
+      color: #777;
+      font-size: 14px;
+    }
+
+    .metric-value {
+      font-size: 29px;
+      font-weight: bold;
+      margin: 13px 0 8px;
+    }
+
+    .metric-change {
+      color: #15966a;
+      font-size: 13px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+    }
+
+    .funnel-row {
+      margin-bottom: 18px;
+    }
+
+    .funnel-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    .bar {
+      height: 10px;
+      background: #edf0f5;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: #635bdb;
+      border-radius: 10px;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .platform-box {
+      background: #f7f7fb;
+      padding: 18px;
+      border-radius: 9px;
+    }
+
+    .platform-box strong {
+      display: block;
+      font-size: 24px;
+      margin-top: 10px;
+    }
+
+    .insight {
+      background: #eeedff;
+      border-left: 4px solid #635bdb;
+      padding: 18px;
+      border-radius: 8px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      color: #888;
+      font-size: 12px;
+      margin-top: 25px;
+    }
+
+    @media(max-width: 800px) {
+      body { padding: 16px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media(max-width: 450px) {
+      .metrics { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <h1>Product Analytics</h1>
+      <p class="subtitle">Monitor product performance and user behaviour</p>
+    </div>
+
+    <select id="periodFilter">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+  </header>
+
+  <section class="metrics">
+    <div class="card">
+      <p class="metric-label">Total Users</p>
+      <div class="metric-value" id="totalUsers">12,450</div>
+      <p class="metric-change">+12.5% vs previous period</p>
+    </div>
+
+    <div class="card">
+      <p class="metric-label">Daily Active Users</p>
+      <div class="metric-value" id="dau">2,840</div>
+      <p class="metric-change">+8.2% vs previous period</p>
+    </div>
+
+    <div class="card">
+      <p class="metric-label">Monthly Active Users</p>
+      <div class="metric-value" id="mau">8,920</div>
+      <p class="metric-change">+15.3% vs previous period</p>
+    </div>
+
+    <div class="card">
+      <p class="metric-label">Application Conversion</p>
+      <div class="metric-value" id="conversion">24.6%</div>
+      <p class="metric-change">+3.4 percentage points</p>
+    </div>
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="panel">
+      <h2>User Activity Trend</h2>
+      <div class="chart-container">
+        <canvas id="activityChart"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Application Funnel</h2>
+
+      <div class="funnel-row">
+        <div class="funnel-info">
+          <span>Registered</span>
+          <strong>5,000</strong>
+        </div>
+        <div class="bar">
+          <div class="bar-fill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <div class="funnel-row">
+        <div class="funnel-info">
+          <span>Application Started</span>
+          <strong>3,600</strong>
+        </div>
+        <div class="bar">
+          <div class="bar-fill" style="width:72%"></div>
+        </div>
+      </div>
+
+      <div class="funnel-row">
+        <div class="funnel-info">
+          <span>Application Submitted</span>
+          <strong>2,100</strong>
+        </div>
+        <div class="bar">
+          <div class="bar-fill" style="width:42%"></div>
+        </div>
+      </div>
+
+      <div class="funnel-row">
+        <div class="funnel-info">
+          <span>Tetr Trial Completed</span>
+          <strong>1,230</strong>
+        </div>
+        <div class="bar">
+          <div class="bar-fill" style="width:24.6%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="panel">
+      <h2>Platform Distribution</h2>
+      <div class="platform-grid">
+        <div class="platform-box">
+          <span>Android Users</span>
+          <strong>8,450</strong>
+        </div>
+        <div class="platform-box">
+          <span>iOS Users</span>
+          <strong>4,000</strong>
+        </div>
+      </div>
+      <div class="chart-container" style="height:200px;margin-top:20px">
+        <canvas id="platformChart"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Product Insight</h2>
+      <div class="insight">
+        <strong>Opportunity identified</strong>
+        <p style="margin-top:10px">
+          Only 42% of registered users submit their application.
+          Improving the application completion experience could
+          increase overall conversion.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Product Metrics Dashboard | Portfolio Project | Sample Data
+  </footer>
+
+</div>
+
+<script>
+  const activityData = {
+    7: {
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      dau: [2100, 2300, 2200, 2500, 2600, 2400, 2840],
+      users: "3,200", dauValue: "2,840",
+      mau: "8,920", conversion: "24.6%"
+    },
+    30: {
+      labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+      dau: [1900, 2200, 2500, 2840],
+      users: "12,450", dauValue: "2,840",
+      mau: "8,920", conversion: "24.6%"
+    },
+    90: {
+      labels: ["Month 1", "Month 2", "Month 3"],
+      dau: [1600, 2200, 2840],
+      users: "28,600", dauValue: "2,840",
+      mau: "8,920", conversion: "24.6%"
+    }
+  };
+
+  const activityChart = new Chart(
+    document.getElementById("activityChart"), {
+      type: "line",
+      data: {
+        labels: activityData[30].labels,
+        datasets: [{
+          label: "Active Users",
+          data: activityData[30].dau,
+          borderColor: "#635bdb",
+          backgroundColor: "rgba(99,91,219,.12)",
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
+    }
+  );
+
+  new Chart(document.getElementById("platformChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Android", "iOS"],
+      datasets: [{
+        data: [8450, 4000],
+        backgroundColor: ["#635bdb", "#20b99a"],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
+
+  document.getElementById("periodFilter")
+    .addEventListener("change", function() {
+      const selected = activityData[this.value];
+
+      document.getElementById("totalUsers").textContent =
+        selected.users;
+      document.getElementById("dau").textContent =
+        selected.dauValue;
+      document.getElementById("mau").textContent =
+        selected.mau;
+      document.getElementById("conversion").textContent =
+        selected.conversion;
+
+      activityChart.data.labels = selected.labels;
+      activityChart.data.datasets[0].data = selected.dau;
+      activityChart.update();
+    });
+</script>
+
+</body>
+</html>
